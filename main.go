@@ -5,11 +5,19 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"sync"
 
 	"github.com/roim10/Watchdog/sources"
 )
 
+type Result struct {
+	Code int
+	Body string
+	Err  error
+}
+
 func main() {
+	var wg sync.WaitGroup
 	file, err := os.Open("api.txt")
 	if err != nil {
 		log.Printf("Ошибка при открытии файла: %v", err)
@@ -37,12 +45,30 @@ func main() {
 	}
 	urlZero := "http://localhost:1"
 	lines = append(lines, urlZero)
+	result := make(chan Result, len(lines))
 	for _, v := range lines {
-		code, body, err := sources.FetchAndPrint(v)
-		if err != nil {
-			log.Println("Не удалось получить данные:", err)
+		wg.Go(func() {
+			code, body, err := sources.FetchAndPrint(v)
+
+			if err != nil {
+				log.Println("Не удалось получить данные:", err)
+			}
+			result <- Result{
+				Code: code,
+				Body: body,
+				Err:  err,
+			}
+		})
+	}
+	go func() {
+		wg.Wait()
+		close(result)
+	}()
+	for r := range result {
+		if r.Err != nil {
+			fmt.Println("ОШИБКА:", r.Err)
 		} else {
-			fmt.Println(code, body)
+			fmt.Println("OK", r.Code, r.Body)
 		}
 	}
 }
