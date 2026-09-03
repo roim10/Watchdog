@@ -3,37 +3,11 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"io"
 	"log"
-	"net/http"
 	"os"
-	"time"
-)
 
-func fetchAndPrint(url string) {
-	client := http.Client{
-		Timeout: 3 * time.Second,
-	}
-	req, err := http.NewRequest(http.MethodGet, url, nil)
-	if err != nil {
-		log.Printf("Ошибка создания запроса: %v", err)
-		return
-	}
-	req.Header.Set("User-Agent", "MyCustomApp/1.0")
-	resp, err := client.Do(req)
-	if err != nil {
-		log.Printf("Ошибка выполнения запроса: %v", err)
-		return
-	}
-	defer resp.Body.Close()
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		log.Printf("Ошибка чтения ответа: %v", err)
-		return
-	}
-	fmt.Printf("Статус: %v\n", resp.StatusCode)
-	fmt.Printf("Тело ответа:\n%s\n", string(body))
-}
+	"github.com/roim10/Watchdog/sources"
+)
 
 func main() {
 	file, err := os.Open("api.txt")
@@ -62,9 +36,13 @@ func main() {
 		return
 	}
 	urlZero := "http://localhost:1"
-	fetchAndPrint(urlOne)
-	fetchAndPrint(urlTwo)
-	fetchAndPrint(urlThree)
-	fetchAndPrint(urlZero)
-
+	lines = append(lines, urlZero)
+	for _, v := range lines {
+		code, body, err := sources.FetchAndPrint(v)
+		if err != nil {
+			log.Println("Не удалось получить данные:", err)
+		} else {
+			fmt.Println(code, body)
+		}
+	}
 }
