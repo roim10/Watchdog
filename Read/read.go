@@ -4,11 +4,11 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	"slices"
+	"strings"
 )
 
-func Read() ([]string, error) {
-	file, err := os.Open("Watchdog/api.txt")
+func Read() ([]Source, error) {
+	file, err := os.Open("api.txt")
 	if err != nil {
 		return nil, fmt.Errorf("ошибка при открытии файла: %w", err)
 	}
@@ -21,8 +21,16 @@ func Read() ([]string, error) {
 	if err := scanner.Err(); err != nil {
 		return nil, fmt.Errorf("ошибка при сканировании: %w", err)
 	}
-	if slices.Contains(lines, "") {
-		return nil, fmt.Errorf("заполните файл URL-адресами")
+	var result []Source
+	for _, line := range lines {
+		parts := strings.Fields(line)
+		if len(parts) != 2 {
+			return nil, fmt.Errorf("некорректная строка: %q", line)
+		}
+		result = append(result, Source{
+			Url:  parts[1],
+			Name: parts[0],
+		})
 	}
-	return lines, nil
+	return result, nil
 }

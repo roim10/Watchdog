@@ -6,32 +6,30 @@ import (
 	"sync"
 
 	read "github.com/roim10/Watchdog/Read"
+	"github.com/roim10/Watchdog/registry"
 	"github.com/roim10/Watchdog/sources"
 )
 
 func main() {
+	reg := registry.New()
 	lines, err := read.Read()
 	if err != nil {
 		log.Fatal(err)
 	}
 	var wg sync.WaitGroup
-	lines = append(lines, "http://localhost:1")
-	result := make(chan sources.Result, len(lines))
 	for _, v := range lines {
 		wg.Go(func() {
-			r := sources.FetchAndPrint(v)
-			result <- r
+			r := sources.FetchAndPrint(v.Url)
+			reg.Set(v.Name, r)
 		})
 	}
-	go func() {
-		wg.Wait()
-		close(result)
-	}()
-	for r := range result {
+	wg.Wait()
+	all := reg.GetAll()
+	for name, r := range all {
 		if r.Err != nil {
-			fmt.Println("ОШИБКА:", r.Err)
+			fmt.Println(name, "ОШИБКА:", r.Err)
 		} else {
-			fmt.Println("OK", r.Code, r.Body)
+			fmt.Println(name, "OK", r.Code, r.Body)
 		}
 	}
 }
