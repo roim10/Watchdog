@@ -1,7 +1,7 @@
 package sources
 
 type Result struct {
-	Code int
-	Body string
-	Err  error
+	Code int    `json:"code"`
+	Body string `json:"body"`
+	Err  error  `json:"-"`
 }

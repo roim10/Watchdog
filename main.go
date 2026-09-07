@@ -1,35 +1,35 @@
 package main
 
 import (
-	"fmt"
 	"log"
-	"sync"
+	"net/http"
+	"time"
 
+	"github.com/gorilla/mux"
 	read "github.com/roim10/Watchdog/Read"
 	"github.com/roim10/Watchdog/registry"
-	"github.com/roim10/Watchdog/sources"
+	"github.com/roim10/Watchdog/survey"
 )
 
 func main() {
 	reg := registry.New()
+
 	lines, err := read.Read()
 	if err != nil {
 		log.Fatal(err)
 	}
-	var wg sync.WaitGroup
-	for _, v := range lines {
-		wg.Go(func() {
-			r := sources.FetchAndPrint(v.Url)
-			reg.Set(v.Name, r)
-		})
-	}
-	wg.Wait()
-	all := reg.GetAll()
-	for name, r := range all {
-		if r.Err != nil {
-			fmt.Println(name, "ОШИБКА:", r.Err)
-		} else {
-			fmt.Println(name, "OK", r.Code, r.Body)
+	ticker := time.NewTicker(10 * time.Second)
+	defer ticker.Stop()
+	go func() {
+		survey.Poll(lines, reg)
+		for {
+			<-ticker.C
+			survey.Poll(lines, reg)
 		}
+	}()
+	router := mux.NewRouter()
+	err = http.ListenAndServe(":8080", router)
+	if err != nil {
+		log.Fatal(err)
 	}
 }
