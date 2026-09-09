@@ -7,6 +7,7 @@ import (
 
 	"github.com/gorilla/mux"
 	read "github.com/roim10/Watchdog/Read"
+	"github.com/roim10/Watchdog/httpapi"
 	"github.com/roim10/Watchdog/registry"
 	"github.com/roim10/Watchdog/survey"
 )
@@ -28,6 +29,8 @@ func main() {
 		}
 	}()
 	router := mux.NewRouter()
+	router.HandleFunc("/status", httpapi.StatusHandler(reg))
+	router.HandleFunc("/status/{name}", httpapi.NameHandle(reg))
 	err = http.ListenAndServe(":8080", router)
 	if err != nil {
 		log.Fatal(err)
