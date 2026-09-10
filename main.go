@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	history "github.com/roim10/Watchdog/History"
 	read "github.com/roim10/Watchdog/Read"
 	"github.com/roim10/Watchdog/httpapi"
 	"github.com/roim10/Watchdog/registry"
@@ -14,7 +15,7 @@ import (
 
 func main() {
 	reg := registry.New()
-
+	hist := history.NewHistory(5)
 	lines, err := read.Read()
 	if err != nil {
 		log.Fatal(err)
@@ -22,10 +23,10 @@ func main() {
 	ticker := time.NewTicker(10 * time.Second)
 	defer ticker.Stop()
 	go func() {
-		survey.Poll(lines, reg)
+		survey.Poll(lines, reg, hist)
 		for {
 			<-ticker.C
-			survey.Poll(lines, reg)
+			survey.Poll(lines, reg, hist)
 		}
 	}()
 	router := mux.NewRouter()
