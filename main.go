@@ -30,6 +30,7 @@ func main() {
 		}
 	}()
 	router := mux.NewRouter()
+	router.HandleFunc("/history/{name}", httpapi.HistoryHandler(hist))
 	router.HandleFunc("/status", httpapi.StatusHandler(reg))
 	router.HandleFunc("/status/{name}", httpapi.NameHandle(reg))
 	err = http.ListenAndServe(":8080", router)
