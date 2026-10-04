@@ -20,3 +20,8 @@ func toSourceStatus(name string, r sources.Result) SourceStatus {
 	}
 	return status
 }
+
+type AddSourceRequest struct {
+	Name string `json:"name"`
+	Url  string `json:"url"`
+}

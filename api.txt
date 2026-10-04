@@ -1,4 +1,4 @@
     JSON https://jsonplaceholder.typicode.com/posts
     Bitcoin https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd
-    RandomUser https://randomuser.me/api/
+    ye https://kanye.rest
     Test http://localhost:1
