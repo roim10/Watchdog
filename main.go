@@ -37,6 +37,7 @@ func main() {
 		}
 	}()
 	router := mux.NewRouter()
+	router.HandleFunc("/sources", httpapi.AddSourceHandler(store)).Methods("POST")
 	router.HandleFunc("/sources/{name}", httpapi.DeleteSourceHandler(store)).Methods("DELETE")
 	router.HandleFunc("/history/{name}", httpapi.HistoryHandler(hist))
 	router.HandleFunc("/status", httpapi.StatusHandler(reg))
