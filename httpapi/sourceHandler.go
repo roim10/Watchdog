@@ -19,6 +19,11 @@ func DeleteSourceHandler(store *sourcestore.SourceStore) http.HandlerFunc {
 			http.Error(w, "source does not found", http.StatusNotFound)
 			return
 		}
+		err = read.RemoveSource(name)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 		fmt.Fprintln(w, "источник успешно удален")
 	}
 }

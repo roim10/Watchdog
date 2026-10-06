@@ -18,3 +18,37 @@ func AppendSource(s Source) error {
 	}
 	return nil
 }
+
+func RemoveSource(name string) error {
+	sources, err := Read()
+	if err != nil {
+		return fmt.Errorf("ошибка чтения источников: %w", err)
+	}
+	var result []Source
+	exist := false
+	for _, src := range sources {
+		if src.Name == name {
+			exist = true
+			continue
+		}
+		result = append(result, src)
+	}
+	if !exist {
+		return fmt.Errorf("source %q does not exist", name)
+	}
+	file, err := os.OpenFile("api.txt", os.O_WRONLY|os.O_TRUNC, 0644)
+	if err != nil {
+		return fmt.Errorf("ошибка открытия файла: %w", err)
+	}
+	defer file.Close()
+
+	for _, src := range result {
+		str := fmt.Sprintf("%s %s\n", src.Name, src.Url)
+		_, err := file.WriteString(str)
+		if err != nil {
+			return fmt.Errorf("ошибка записи в файл: %w", err)
+		}
+	}
+	return nil
+
+}
